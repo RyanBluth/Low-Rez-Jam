@@ -1,0 +1,44 @@
+{
+  "assets": [
+  	{
+  		"type":"texture",
+  		"id":"background",
+  		"src":"background.png"
+  	},
+  	{
+  		"type":"texture",
+  		"id":"p1",
+  		"src":"p1.png"
+  	},
+  	{
+  		"type":"texture",
+  		"id":"p2",
+  		"src":"p2.png"
+  	},
+  	{
+  		"type":"texture",
+  		"id":"drawText",
+  		"src":"drawText.png"
+  	},
+  	{
+  		"type":"texture",
+  		"id":"redText",
+  		"src":"redText.png"
+  	},
+  	{
+  		"type":"texture",
+  		"id":"blueText",
+  		"src":"blueText.png"
+  	},  	
+  	{
+  		"type":"texture",
+  		"id":"cactus",
+  		"src":"cactus.png"
+  	},
+  	{
+  		"type":"texture",
+  		"id":"barrel",
+  		"src":"barrel.png"
+  	}
+  ]
+}

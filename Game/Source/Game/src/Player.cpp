@@ -1,0 +1,72 @@
+#include <Player.h>
+#include <MY_ResourceManager.h>
+
+#define SPEED 0.5f
+#define HEIGHT 9.f
+#define HALF_HEIGHT HEIGHT * 0.5f
+#define WIDTH 4.f
+#define HALF_WIDTH WIDTH * 0.5f
+
+Player::Player(PlayerNum _pnum, Shader * _shader) :
+	Sprite(_shader),
+	keyboard(&Keyboard::getInstance()),
+	pnum(_pnum),
+	bbox(sweet::Rectangle(0, 0, 3, 9)),
+	movX(0.f),
+	movY(0.f),
+	bullets(3)
+{
+	mesh->setScaleMode(GL_NEAREST);
+
+	if(pnum == PLAYER_1) {
+		setPrimaryTexture(MY_ResourceManager::globalAssets->getTexture("p1")->texture);
+		up	   = GLFW_KEY_W;
+		down   = GLFW_KEY_S;
+		left   = GLFW_KEY_A;
+		right  = GLFW_KEY_D;
+		shootC = GLFW_KEY_C;
+		gorgeLimitUp = 26;
+		gorgeLimitDown = -999;
+	}else {
+		setPrimaryTexture(MY_ResourceManager::globalAssets->getTexture("p2")->texture);
+		up	   = GLFW_KEY_UP;
+		down   = GLFW_KEY_DOWN;
+		left   = GLFW_KEY_LEFT;
+		right  = GLFW_KEY_RIGHT;
+		shootC = GLFW_KEY_SLASH;
+		gorgeLimitUp = 999;
+		gorgeLimitDown = 40;
+	}
+}
+
+void Player::update(Step* _step) {
+	if(active){
+		glm::vec3 worldPos = getWorldPos();
+
+		if(keyboard->keyDown(up) && worldPos.y < 63 - HALF_HEIGHT && worldPos.y < gorgeLimitUp) {
+			firstParent()->translate(0.f, SPEED, 0.f);
+		}
+		if(keyboard->keyDown(down) && worldPos.y > 2 + HALF_HEIGHT  && worldPos.y > gorgeLimitDown) {
+			firstParent()->translate(0.f, -SPEED, 0.f);
+		}
+		if(keyboard->keyDown(left) && worldPos.x > 1 + HALF_WIDTH) {
+			firstParent()->translate(-SPEED, 0.f, 0.f);
+		}
+		if(keyboard->keyDown(right) && worldPos.x < 63 - HALF_WIDTH) {
+			firstParent()->translate(SPEED, 0.f, 0.f);
+		}
+		if(bullets > 0 && keyboard->keyJustDown(shootC)) {
+			shoot();
+		}
+
+		worldPos = getWorldPos();
+
+		bbox.x = worldPos.x - bbox.width/2;
+		bbox.y = worldPos.y - bbox.height/2;
+	}
+	Sprite::update(_step);
+}
+
+void Player::shoot() {
+	--bullets;
+}
