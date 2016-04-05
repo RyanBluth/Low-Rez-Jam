@@ -44,6 +44,16 @@
   		"type":"texture",
   		"id":"menu",
   		"src":"menu.png"
-  	}
+  	},
+  	{
+      "id": "shoot",
+      "type": "audio",
+      "src": "shoot.wav"
+    },
+  	{
+      "id": "reload",
+      "type": "audio",
+      "src": "reload.wav"
+    }
   ]
 }

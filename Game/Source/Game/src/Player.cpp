@@ -82,11 +82,13 @@ void Player::update(Step* _step) {
 
 void Player::shoot() {
 	--bullets;
+	MY_ResourceManager::globalAssets->getAudio("shoot")->sound->play();
 }
 
 void Player::addBullet() {
 	bullets++;
 	reload();
+	MY_ResourceManager::globalAssets->getAudio("reload")->sound->play();
 }
 
 void Player::reload() {
