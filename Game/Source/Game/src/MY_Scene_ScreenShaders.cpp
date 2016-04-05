@@ -122,6 +122,7 @@ void MY_Scene_ScreenShaders::update(Step * _step){
 				if(bullets.at(i)->bbox.intersects(player2->bbox)) {
 					if(!drawText->isVisible()){
 						player2->hit = true;
+						player2->active = false;
 						hitSomething = true;
 					}
 				}
@@ -129,6 +130,7 @@ void MY_Scene_ScreenShaders::update(Step * _step){
 				if(bullets.at(i)->bbox.intersects(player1->bbox)) {
 					if(!drawText->isVisible()){
 						player1->hit = true;
+						player1->active = false;
 						hitSomething = true;
 					}
 				}
@@ -149,9 +151,6 @@ void MY_Scene_ScreenShaders::update(Step * _step){
 		}
 
 		if(blueText->isVisible() || redText->isVisible() || drawText->isVisible()) {
-			player1->active = false;
-			player2->active = false;
-
 			if(keyboard->keyJustUp(GLFW_KEY_SPACE)) {
 				MY_Scene_ScreenShaders * ns = new MY_Scene_ScreenShaders(game, false);
 				std::string key = std::to_string(sweet::step.time);
