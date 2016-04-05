@@ -12,13 +12,14 @@
 
 MY_Scene_ScreenShaders::MY_Scene_ScreenShaders(Game * _game, bool _showMenu) :
 	MY_Scene_Base(_game),
-	screenSurfaceShader(new Shader("assets/engine basics/DefaultRenderSurface", false, true)),
+	screenSurfaceShader(new Shader("assets/RenderSurface_1", false, true)),
 	screenSurface(new RenderSurface(screenSurfaceShader, true)),
 	screenFBO(new StandardFrameBuffer(true)),
 	renderPlane(new MeshEntity(MeshFactory::getPlaneMesh())),
 	orthoCam(new OrthographicCamera(0, 64, 0, 64, -10, 10))
 {
 	screenSurface->setScaleMode(GL_NEAREST);
+	screenSurface->uvEdgeMode = GL_CLAMP_TO_BORDER;
 
 	activeCamera = orthoCam;
 	childTransform->addChild(orthoCam);
@@ -112,6 +113,24 @@ MY_Scene_ScreenShaders::~MY_Scene_ScreenShaders(){
 }
 
 void MY_Scene_ScreenShaders::update(Step * _step){
+	// Screen shader update
+	// Screen shaders are typically loaded from a file instead of built using components, so to update their uniforms
+	// we need to use the OpenGL API calls
+	screenSurfaceShader->bindShader(); // remember that we have to bind the shader before it can be updated
+	GLint test = glGetUniformLocation(screenSurfaceShader->getProgramId(), "time");
+	checkForGlError(0);
+	if(test != -1){
+		glUniform1f(test, _step->time);
+		checkForGlError(0);
+	}
+
+	if(keyboard->keyJustDown(GLFW_KEY_L)){
+		screenSurfaceShader->unload();
+		screenSurfaceShader->loadFromFile(screenSurfaceShader->vertSource, screenSurfaceShader->fragSource);
+		screenSurfaceShader->load();
+	}
+
+
 	if(!menu->isVisible()){
 		updateBulletDisplay();
 
@@ -196,6 +215,7 @@ void MY_Scene_ScreenShaders::render(sweet::MatrixStack * _matrixStack, RenderOpt
 	// bind our screen framebuffer
 	FrameBufferInterface::pushFbo(screenFBO);
 	// render the scene
+	uiLayer->setVisible(false);
 	MY_Scene_Base::render(_matrixStack, _renderOptions);
 	// unbind our screen framebuffer, rebinding the previously bound framebuffer
 	// since we didn't have one bound before, this will be the default framebuffer (i.e. the one visible to the player)
@@ -214,6 +234,7 @@ void MY_Scene_ScreenShaders::render(sweet::MatrixStack * _matrixStack, RenderOpt
 	screenSurface->render(screenFBO->getTextureId());
 
 	// render the uiLayer after the screen surface in order to avoid hiding it through shader code
+	uiLayer->setVisible(true);
 	uiLayer->render(_matrixStack, _renderOptions);
 }
 
