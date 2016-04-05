@@ -10,12 +10,12 @@
 #include <Bullet.h>
 #include <Prop.h>
 
-MY_Scene_ScreenShaders::MY_Scene_ScreenShaders(Game * _game) :
+MY_Scene_ScreenShaders::MY_Scene_ScreenShaders(Game * _game, bool _showMenu) :
 	MY_Scene_Base(_game),
-	renderPlane(new MeshEntity(MeshFactory::getPlaneMesh())),
 	screenSurfaceShader(new Shader("assets/engine basics/DefaultRenderSurface", false, true)),
 	screenSurface(new RenderSurface(screenSurfaceShader, true)),
 	screenFBO(new StandardFrameBuffer(true)),
+	renderPlane(new MeshEntity(MeshFactory::getPlaneMesh())),
 	orthoCam(new OrthographicCamera(0, 64, 0, 64, -10, 10))
 {
 	screenSurface->setScaleMode(GL_NEAREST);
@@ -23,9 +23,6 @@ MY_Scene_ScreenShaders::MY_Scene_ScreenShaders(Game * _game) :
 	activeCamera = orthoCam;
 	childTransform->addChild(orthoCam);
 	cameras.push_back(orthoCam);
-
-	// set-up some UI to toggle between results
-	uiLayer->addMouseIndicator();
 
 	// memory management
 	screenSurface->incrementReferenceCount();
@@ -49,12 +46,12 @@ MY_Scene_ScreenShaders::MY_Scene_ScreenShaders(Game * _game) :
 
 	player1 = new Player(PLAYER_1, baseShader);
 	childTransform->addChild(player1)
-		->translate(32.f, 5.f, 0.f)
+		->translate(32.f, 6.f, 0.f)
 		->scale(9.f);
 
 	player2 = new Player(PLAYER_2, baseShader);
 	childTransform->addChild(player2)
-		->translate(32.f, 50.f, 0.f)
+		->translate(32.f, 59.f, 0.f)
 		->scale(9.f);
 
 	auto c2 = new Prop(baseShader, "cactus");
@@ -98,6 +95,13 @@ MY_Scene_ScreenShaders::MY_Scene_ScreenShaders(Game * _game) :
 	childTransform->addChild(blueText)->translate(32, 32, 0);
 	blueText->mesh->pushTexture2D(MY_ResourceManager::globalAssets->getTexture("blueText")->texture);
 	blueText->setVisible(false);
+
+	// Add menu screen last{
+	menu = new MeshEntity(MeshFactory::getPlaneMesh(32.f), baseShader);
+	childTransform->addChild(menu)->translate(32.f, 32.f, 0);
+	menu->mesh->pushTexture2D(MY_ResourceManager::globalAssets->getTexture("menu")->texture);
+	menu->mesh->setScaleMode(GL_NEAREST);
+	menu->setVisible(_showMenu);
 }
 
 MY_Scene_ScreenShaders::~MY_Scene_ScreenShaders(){
@@ -108,55 +112,75 @@ MY_Scene_ScreenShaders::~MY_Scene_ScreenShaders(){
 }
 
 void MY_Scene_ScreenShaders::update(Step * _step){
-	while(player1->bullets < p1Bullets->children.size()) {
-		p1Bullets->removeChild(p1Bullets->children.back());
-		emitBullet(player1->firstParent(), 1);
-	}
-	while(player2->bullets < p2Bullets->children.size()) {
-		p2Bullets->removeChild(p2Bullets->children.back());
-		emitBullet(player2->firstParent(), -1);
-	}
-	for(unsigned long int i = 0; i < bullets.size();){
-		if(bullets.at(i)->dir > 0) {
-			if(bullets.at(i)->bbox.intersects(player2->bbox)) {
-				blueText->setVisible(true);
+	if(!menu->isVisible()){
+		updateBulletDisplay();
+
+		for(unsigned long int i = 0; i < bullets.size();){
+			bool hitSomething = false;
+
+			if(bullets.at(i)->dir > 0) {
+				if(bullets.at(i)->bbox.intersects(player2->bbox)) {
+					if(!drawText->isVisible()){
+						player2->hit = true;
+						hitSomething = true;
+					}
+				}
+			}else {
+				if(bullets.at(i)->bbox.intersects(player1->bbox)) {
+					if(!drawText->isVisible()){
+						player1->hit = true;
+						hitSomething = true;
+					}
+				}
 			}
-		}else {
-			if(bullets.at(i)->bbox.intersects(player1->bbox)) {
-				redText->setVisible(true);
+
+			for(auto p : props) {
+				if(p->bbox.intersects(bullets.at(i)->bbox)) {
+					hitSomething = true;
+				}
+			}
+
+			if(hitSomething || bullets.at(i)->getWorldPos().y > 70 || bullets.at(i)->getWorldPos().y < -10) {
+				childTransform->removeChild(bullets.at(i)->firstParent());
+				bullets.erase(bullets.begin() + i);
+			}else {
+				++i;
 			}
 		}
 
-		bool hitProp = false;
+		if(blueText->isVisible() || redText->isVisible() || drawText->isVisible()) {
+			player1->active = false;
+			player2->active = false;
 
-		for(auto p : props) {
-			if(p->bbox.intersects(bullets.at(i)->bbox)) {
-				hitProp = true;
+			if(keyboard->keyJustUp(GLFW_KEY_SPACE)) {
+				MY_Scene_ScreenShaders * ns = new MY_Scene_ScreenShaders(game, false);
+				std::string key = std::to_string(sweet::step.time);
+				game->scenes[key] = ns;
+				game->switchScene(key, true);
 			}
 		}
 
-		if(hitProp || bullets.at(i)->getWorldPos().y > 70 || bullets.at(i)->getWorldPos().y < -10) {
-			childTransform->removeChild(bullets.at(i)->firstParent());
-			bullets.erase(bullets.begin() + i);
-		}else {
-			++i;
+		if(player2->hit && player1->hit) {
+			drawText->setVisible(true);
+			redText->setVisible(false);
+			blueText->setVisible(false);
+		}
+
+		if(player2->hit && !player1->hit && bullets.size() == 0) {
+			drawText->setVisible(false);
+			redText->setVisible(false);
+			blueText->setVisible(true);
+		}
+
+		if(player1->hit && !player2->hit && bullets.size() == 0) {
+			drawText->setVisible(false);
+			redText->setVisible(true);
+			blueText->setVisible(false);
 		}
 	}
 
-	if(blueText->isVisible() || redText->isVisible() || drawText->isVisible()) {
-		player1->active = false;
-		player2->active = false;
-
-		if(keyboard->keyJustUp(GLFW_KEY_SPACE)) {
-			MY_Scene_ScreenShaders * ns = new MY_Scene_ScreenShaders(game);
-			std::string key = std::to_string(sweet::step.time);
-			game->scenes[key] = ns;
-			game->switchScene(key, true);
-		}
-	}
-
-	if(!redText->isVisible() && !blueText->isVisible() && bullets.size() == 0 &&  player1->bullets <= 0 && player2->bullets <= 0) {
-		drawText->setVisible(true);
+	if(keyboard->keyJustUp(GLFW_KEY_SPACE)) {
+		menu->setVisible(false);
 	}
 
 	// Scene update
@@ -206,6 +230,34 @@ void MY_Scene_ScreenShaders::emitBullet(Transform * _from, int _yDir) {
 	childTransform->addChild(b)
 		->translate(_from->getTranslationVector(), false);
 	bullets.push_back(b);
+}
+
+void MY_Scene_ScreenShaders::updateBulletDisplay() {
+	while(player1->bullets < p1Bullets->children.size()) {
+		p1Bullets->removeChild(p1Bullets->children.back());
+		emitBullet(player1->firstParent(), 1);
+	}
+
+	while(player2->bullets < p2Bullets->children.size()) {
+		p2Bullets->removeChild(p2Bullets->children.back());
+		emitBullet(player2->firstParent(), -1);
+	}
+
+	int i = player1->bullets - 1;
+	while(player1->bullets > p1Bullets->children.size()) {
+		auto b = new MeshEntity(MeshFactory::getPlaneMesh(), baseShader);
+		p1Bullets->addChild(b)
+			->translate(4 + i * 2, 3, 0);
+		++i;
+	}
+
+	i = player2->bullets - 1;
+	while(player2->bullets > p2Bullets->children.size()) {
+		auto b = new MeshEntity(MeshFactory::getPlaneMesh(), baseShader);
+		p2Bullets->addChild(b)
+			->translate(57 + i * 2, 61, 0);
+		++i;
+	}
 }
 
 void MY_Scene_ScreenShaders::unload(){

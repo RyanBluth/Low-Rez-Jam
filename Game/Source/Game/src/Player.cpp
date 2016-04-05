@@ -14,26 +14,30 @@ Player::Player(PlayerNum _pnum, Shader * _shader) :
 	bbox(sweet::Rectangle(0, 0, 3, 9)),
 	movX(0.f),
 	movY(0.f),
-	bullets(3)
+	bullets(3),
+	reloadingTimer(0.f),
+	hit(false)
 {
 	mesh->setScaleMode(GL_NEAREST);
 
 	if(pnum == PLAYER_1) {
 		setPrimaryTexture(MY_ResourceManager::globalAssets->getTexture("p1")->texture);
-		up	   = GLFW_KEY_W;
-		down   = GLFW_KEY_S;
-		left   = GLFW_KEY_A;
-		right  = GLFW_KEY_D;
-		shootC = GLFW_KEY_C;
+		up	   =  GLFW_KEY_W;
+		down   =  GLFW_KEY_S;
+		left   =  GLFW_KEY_A;
+		right  =  GLFW_KEY_D;
+		shootC =  GLFW_KEY_C;
+		reloadC = GLFW_KEY_R;
 		gorgeLimitUp = 26;
 		gorgeLimitDown = -999;
 	}else {
 		setPrimaryTexture(MY_ResourceManager::globalAssets->getTexture("p2")->texture);
-		up	   = GLFW_KEY_UP;
-		down   = GLFW_KEY_DOWN;
-		left   = GLFW_KEY_LEFT;
-		right  = GLFW_KEY_RIGHT;
-		shootC = GLFW_KEY_SLASH;
+		up	    = GLFW_KEY_UP;
+		down    = GLFW_KEY_DOWN;
+		left    = GLFW_KEY_LEFT;
+		right   = GLFW_KEY_RIGHT;
+		shootC  = GLFW_KEY_SLASH;
+		reloadC = GLFW_KEY_L;
 		gorgeLimitUp = 999;
 		gorgeLimitDown = 40;
 	}
@@ -41,24 +45,33 @@ Player::Player(PlayerNum _pnum, Shader * _shader) :
 
 void Player::update(Step* _step) {
 	if(active){
-		glm::vec3 worldPos = getWorldPos();
+		if(reloadingTimer < 0.005f){
+			glm::vec3 worldPos = getWorldPos();
 
-		if(keyboard->keyDown(up) && worldPos.y < 63 - HALF_HEIGHT && worldPos.y < gorgeLimitUp) {
-			firstParent()->translate(0.f, SPEED, 0.f);
+			if(keyboard->keyDown(up) && worldPos.y < 63 - HALF_HEIGHT && worldPos.y < gorgeLimitUp) {
+				firstParent()->translate(0.f, SPEED, 0.f);
+			}
+			if(keyboard->keyDown(down) && worldPos.y > 1 + HALF_HEIGHT  && worldPos.y > gorgeLimitDown) {
+				firstParent()->translate(0.f, -SPEED, 0.f);
+			}
+			if(keyboard->keyDown(left) && worldPos.x > 1 + HALF_WIDTH) {
+				firstParent()->translate(-SPEED, 0.f, 0.f);
+			}
+			if(keyboard->keyDown(right) && worldPos.x < 63 - HALF_WIDTH) {
+				firstParent()->translate(SPEED, 0.f, 0.f);
+			}
+			if(bullets > 0 && keyboard->keyJustDown(shootC)) {
+				shoot();
+			}
+			if(keyboard->keyJustDown(reloadC)) {
+				reload();
+			}
+		}else {
+			reloadingTimer -= _step->deltaTime;
+			if(reloadingTimer <= 0.f) {
+				addBullet();
+			}
 		}
-		if(keyboard->keyDown(down) && worldPos.y > 2 + HALF_HEIGHT  && worldPos.y > gorgeLimitDown) {
-			firstParent()->translate(0.f, -SPEED, 0.f);
-		}
-		if(keyboard->keyDown(left) && worldPos.x > 1 + HALF_WIDTH) {
-			firstParent()->translate(-SPEED, 0.f, 0.f);
-		}
-		if(keyboard->keyDown(right) && worldPos.x < 63 - HALF_WIDTH) {
-			firstParent()->translate(SPEED, 0.f, 0.f);
-		}
-		if(bullets > 0 && keyboard->keyJustDown(shootC)) {
-			shoot();
-		}
-
 		worldPos = getWorldPos();
 
 		bbox.x = worldPos.x - bbox.width/2;
@@ -69,4 +82,15 @@ void Player::update(Step* _step) {
 
 void Player::shoot() {
 	--bullets;
+}
+
+void Player::addBullet() {
+	bullets++;
+	reload();
+}
+
+void Player::reload() {
+	if(bullets < 3){
+		reloadingTimer = 30.f;
+	}
 }

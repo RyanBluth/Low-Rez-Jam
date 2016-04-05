@@ -39,6 +39,11 @@
   		"type":"texture",
   		"id":"barrel",
   		"src":"barrel.png"
+  	},
+  	{
+  		"type":"texture",
+  		"id":"menu",
+  		"src":"menu.png"
   	}
   ]
 }

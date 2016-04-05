@@ -19,12 +19,15 @@ public:
 	KeyCode left;
 	KeyCode right;
 	KeyCode shootC;
+	KeyCode reloadC;
 
 	Keyboard * const keyboard;
 
 	PlayerNum pnum;
 
 	sweet::Rectangle bbox;
+
+	bool hit;
 
 	float movX;
 	float movY;
@@ -33,9 +36,13 @@ public:
 	int gorgeLimitUp;
 	int gorgeLimitDown;
 
+	int reloadingTimer;
+
 	explicit Player(PlayerNum _pnum, Shader * _shader);
 
 	virtual void update(Step * _step) override;
 
 	void shoot();
+	void addBullet();
+	void reload();
 };

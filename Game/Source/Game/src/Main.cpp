@@ -36,6 +36,8 @@ int __stdcall WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmd, int show){
 	MY_Game * game = new MY_Game();
 	game->init();
 
+	sweet::setCursorMode(GLFW_CURSOR_NORMAL);
+
 	// main game loop
 	while (game->isRunning){
 		game->performGameLoop();

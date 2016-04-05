@@ -15,6 +15,8 @@ public:
 	MeshEntity * redText;
 	MeshEntity * blueText;
 
+	MeshEntity * menu;
+
 	Shader * screenSurfaceShader;
 	RenderSurface * screenSurface;
 	StandardFrameBuffer * screenFBO;
@@ -40,7 +42,8 @@ public:
 	virtual void load() override;
 
 	virtual void emitBullet(Transform * _from, int _yDir);
+	virtual void updateBulletDisplay();
 
-	MY_Scene_ScreenShaders(Game * _game);
+	MY_Scene_ScreenShaders(Game * _game, bool _showMenu);
 	~MY_Scene_ScreenShaders();
 };
