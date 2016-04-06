@@ -137,16 +137,14 @@ void MY_Scene_Main::update(Step * _step){
 			if(bullets.at(i)->dir > 0) {
 				if(bullets.at(i)->bbox.intersects(player2->bbox)) {
 					if(!drawText->isVisible()){
-						player2->hit = true;
-						player2->active = false;
+						player2->die();
 						hitSomething = true;
 					}
 				}
 			}else {
 				if(bullets.at(i)->bbox.intersects(player1->bbox)) {
 					if(!drawText->isVisible()){
-						player1->hit = true;
-						player1->active = false;
+						player1->die();
 						hitSomething = true;
 					}
 				}

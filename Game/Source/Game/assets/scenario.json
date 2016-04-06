@@ -15,6 +15,16 @@
   		"id":"p2",
   		"src":"p2.png"
   	},
+    {
+      "type":"texture",
+      "id":"p1_dead",
+      "src":"p1_dead.png"
+    },
+    {
+      "type":"texture",
+      "id":"p2_dead",
+      "src":"p2_dead.png"
+    },
   	{
   		"type":"texture",
   		"id":"drawText",
@@ -54,6 +64,11 @@
       "id": "reload",
       "type": "audio",
       "src": "reload.wav"
+    },
+    {
+      "id": "die",
+      "type": "audio",
+      "src": "die.wav"
     }
   ]
 }

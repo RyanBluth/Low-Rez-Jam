@@ -115,3 +115,18 @@ void Player::reload() {
 		reloadingTimer = 30.f;
 	}
 }
+
+void Player::die(){
+	if(!hit){
+		hit = true;
+		active = false;
+		if(pnum == PLAYER_1) {
+			setPrimaryTexture(MY_ResourceManager::globalAssets->getTexture("p1_dead")->texture);
+		}else {
+			setPrimaryTexture(MY_ResourceManager::globalAssets->getTexture("p2_dead")->texture);
+		}
+		MY_ResourceManager::globalAssets->getAudio("die")->sound->play();
+		meshTransform->scale(10.f);
+		freezeTransformation();
+	}
+}

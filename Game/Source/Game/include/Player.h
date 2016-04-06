@@ -45,4 +45,5 @@ public:
 	void shoot();
 	void addBullet();
 	void reload();
+	void die();
 };
