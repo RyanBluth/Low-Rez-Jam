@@ -51,7 +51,7 @@ MY_Scene_Main::MY_Scene_Main(Game * _game, bool _showMenu) :
 
 	player2 = new Player(PLAYER_2, baseShader);
 	childTransform->addChild(player2)
-		->translate(30.f, 59.f, 0.f);
+		->translate(30.f, 58.f, 0.f);
 
 	auto c2 = new Prop(baseShader, "cactus");
 	childTransform->addChild(c2)

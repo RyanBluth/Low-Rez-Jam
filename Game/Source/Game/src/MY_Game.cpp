@@ -4,7 +4,6 @@
 
 #include <MY_ResourceManager.h>
 
-
 #include <MY_Scene_Main.h>
 
 MY_Game::MY_Game() :
@@ -16,6 +15,10 @@ MY_Game::MY_Game() :
 	// their creation will be front-loaded. To avoid this, you can check to see if a scene exists immediately
 	// before switching to it, and create it then if needed.
 	switchScene("screenShaders", false);
+
+	auto m = MY_ResourceManager::globalAssets->getAudio("bgm")->sound;
+	m->setGain(0.5f);
+	m->play(true);
 }
 
 MY_Game::~MY_Game(){}

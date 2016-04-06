@@ -11,7 +11,7 @@ Player::Player(PlayerNum _pnum, Shader * _shader) :
 	Sprite(_shader),
 	keyboard(&Keyboard::getInstance()),
 	pnum(_pnum),
-	bbox(sweet::Rectangle(0, 0, 3, 9)),
+	bbox(sweet::Rectangle(0, 0, 2, 5)),
 	hit(false),
 	movX(0.f),
 	movY(0.f),
@@ -48,7 +48,6 @@ Player::Player(PlayerNum _pnum, Shader * _shader) :
 void Player::update(Step* _step) {
 	if(active){
 		if(reloadingTimer < 0.005f){
-
 			glm::vec3 worldPos = getWorldPos();
 
 			if(keyboard->keyDown(up) && worldPos.y < 63 - HALF_HEIGHT && worldPos.y < gorgeLimitUp) {
@@ -93,8 +92,8 @@ void Player::update(Step* _step) {
 		}
 		worldPos = getWorldPos();
 
-		bbox.x = worldPos.x - bbox.width/2;
-		bbox.y = worldPos.y - bbox.height/2;
+		bbox.x = worldPos.x;
+		bbox.y = worldPos.y;
 	}
 	Sprite::update(_step);
 }

@@ -69,6 +69,11 @@
       "id": "die",
       "type": "audio",
       "src": "die.wav"
+    },
+    {
+      "id": "bgm",
+      "type": "audio",
+      "src": "dusty.ogg"
     }
   ]
 }
