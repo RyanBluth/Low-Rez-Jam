@@ -1,7 +1,7 @@
 #include <Player.h>
 #include <MY_ResourceManager.h>
 
-#define SPEED 1.f
+#define SPEED 0.5f
 #define HEIGHT 10.f
 #define HALF_HEIGHT HEIGHT * 0.5f
 #define WIDTH 4.f
@@ -60,7 +60,7 @@ void Player::update(Step* _step) {
 			}
 			if(keyboard->keyDown(down) && worldPos.y > 1 + HALF_HEIGHT  && worldPos.y > gorgeLimitDown) {
 				movY -= SPEED;
-				if(movY <= 1.f){
+				if(movY <= -1.f){
 					firstParent()->translate(0.f, -1.f, 0.f);
 					movY = 0.f;
 				}
