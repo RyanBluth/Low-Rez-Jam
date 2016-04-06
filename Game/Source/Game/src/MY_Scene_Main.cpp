@@ -1,6 +1,6 @@
 #pragma once
 
-#include <MY_Scene_ScreenShaders.h>
+#include <MY_Scene_Main.h>
 #include <RenderSurface.h>
 #include <StandardFrameBuffer.h>
 #include <RenderOptions.h>
@@ -10,7 +10,7 @@
 #include <Bullet.h>
 #include <Prop.h>
 
-MY_Scene_ScreenShaders::MY_Scene_ScreenShaders(Game * _game, bool _showMenu) :
+MY_Scene_Main::MY_Scene_Main(Game * _game, bool _showMenu) :
 	MY_Scene_Base(_game),
 	screenSurfaceShader(new Shader("assets/RenderSurface_1", false, true)),
 	screenSurface(new RenderSurface(screenSurfaceShader, true)),
@@ -47,13 +47,11 @@ MY_Scene_ScreenShaders::MY_Scene_ScreenShaders(Game * _game, bool _showMenu) :
 
 	player1 = new Player(PLAYER_1, baseShader);
 	childTransform->addChild(player1)
-		->translate(32.f, 6.f, 0.f)
-		->scale(9.f);
+		->translate(30.f, 6.f, 0.f);
 
 	player2 = new Player(PLAYER_2, baseShader);
 	childTransform->addChild(player2)
-		->translate(32.f, 59.f, 0.f)
-		->scale(9.f);
+		->translate(30.f, 59.f, 0.f);
 
 	auto c2 = new Prop(baseShader, "cactus");
 	childTransform->addChild(c2)
@@ -105,14 +103,14 @@ MY_Scene_ScreenShaders::MY_Scene_ScreenShaders(Game * _game, bool _showMenu) :
 	menu->setVisible(_showMenu);
 }
 
-MY_Scene_ScreenShaders::~MY_Scene_ScreenShaders(){
+MY_Scene_Main::~MY_Scene_Main(){
 	// memory management
 	screenSurface->decrementAndDelete();
 	screenSurfaceShader->decrementAndDelete();
 	screenFBO->decrementAndDelete();
 }
 
-void MY_Scene_ScreenShaders::update(Step * _step){
+void MY_Scene_Main::update(Step * _step){
 	// Screen shader update
 	// Screen shaders are typically loaded from a file instead of built using components, so to update their uniforms
 	// we need to use the OpenGL API calls
@@ -129,7 +127,6 @@ void MY_Scene_ScreenShaders::update(Step * _step){
 		screenSurfaceShader->loadFromFile(screenSurfaceShader->vertSource, screenSurfaceShader->fragSource);
 		screenSurfaceShader->load();
 	}
-
 
 	if(!menu->isVisible()){
 		updateBulletDisplay();
@@ -171,7 +168,7 @@ void MY_Scene_ScreenShaders::update(Step * _step){
 
 		if(blueText->isVisible() || redText->isVisible() || drawText->isVisible()) {
 			if(keyboard->keyJustUp(GLFW_KEY_SPACE)) {
-				MY_Scene_ScreenShaders * ns = new MY_Scene_ScreenShaders(game, false);
+				MY_Scene_Main * ns = new MY_Scene_Main(game, false);
 				std::string key = std::to_string(sweet::step.time);
 				game->scenes[key] = ns;
 				game->switchScene(key, true);
@@ -205,7 +202,7 @@ void MY_Scene_ScreenShaders::update(Step * _step){
 	MY_Scene_Base::update(_step);
 }
 
-void MY_Scene_ScreenShaders::render(sweet::MatrixStack * _matrixStack, RenderOptions * _renderOptions){
+void MY_Scene_Main::render(sweet::MatrixStack * _matrixStack, RenderOptions * _renderOptions){
 	_renderOptions->clear();
 	_renderOptions->setViewPort(0, 0, 64, 64);
 	_renderOptions->depthEnabled = false;
@@ -238,21 +235,21 @@ void MY_Scene_ScreenShaders::render(sweet::MatrixStack * _matrixStack, RenderOpt
 	uiLayer->render(_matrixStack, _renderOptions);
 }
 
-void MY_Scene_ScreenShaders::load(){
+void MY_Scene_Main::load(){
 	MY_Scene_Base::load();
 
 	screenSurface->load();
 	screenFBO->load();
 }
 
-void MY_Scene_ScreenShaders::emitBullet(Transform * _from, int _yDir) {
+void MY_Scene_Main::emitBullet(Transform * _from, int _yDir) {
 	auto b = new Bullet(_yDir, baseShader);
 	childTransform->addChild(b)
 		->translate(_from->getTranslationVector(), false);
 	bullets.push_back(b);
 }
 
-void MY_Scene_ScreenShaders::updateBulletDisplay() {
+void MY_Scene_Main::updateBulletDisplay() {
 	while(player1->bullets < p1Bullets->children.size()) {
 		p1Bullets->removeChild(p1Bullets->children.back());
 		emitBullet(player1->firstParent(), 1);
@@ -280,7 +277,7 @@ void MY_Scene_ScreenShaders::updateBulletDisplay() {
 	}
 }
 
-void MY_Scene_ScreenShaders::unload(){
+void MY_Scene_Main::unload(){
 	screenFBO->unload();
 	screenSurface->unload();
 

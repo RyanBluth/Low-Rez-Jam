@@ -1,8 +1,8 @@
 #include <Player.h>
 #include <MY_ResourceManager.h>
 
-#define SPEED 0.5f
-#define HEIGHT 9.f
+#define SPEED 1.f
+#define HEIGHT 10.f
 #define HALF_HEIGHT HEIGHT * 0.5f
 #define WIDTH 4.f
 #define HALF_WIDTH WIDTH * 0.5f
@@ -12,11 +12,11 @@ Player::Player(PlayerNum _pnum, Shader * _shader) :
 	keyboard(&Keyboard::getInstance()),
 	pnum(_pnum),
 	bbox(sweet::Rectangle(0, 0, 3, 9)),
+	hit(false),
 	movX(0.f),
 	movY(0.f),
 	bullets(3),
-	reloadingTimer(0.f),
-	hit(false)
+	reloadingTimer(0.f)
 {
 	mesh->setScaleMode(GL_NEAREST);
 
@@ -41,24 +41,43 @@ Player::Player(PlayerNum _pnum, Shader * _shader) :
 		gorgeLimitUp = 999;
 		gorgeLimitDown = 40;
 	}
+	meshTransform->scale(10.f);
+	freezeTransformation();
 }
 
 void Player::update(Step* _step) {
 	if(active){
 		if(reloadingTimer < 0.005f){
+
 			glm::vec3 worldPos = getWorldPos();
 
 			if(keyboard->keyDown(up) && worldPos.y < 63 - HALF_HEIGHT && worldPos.y < gorgeLimitUp) {
-				firstParent()->translate(0.f, SPEED, 0.f);
+				movY += SPEED;
+				if(movY >= 1.f){
+					firstParent()->translate(0.f, 1.f, 0.f);
+					movY = 0.f;
+				}
 			}
 			if(keyboard->keyDown(down) && worldPos.y > 1 + HALF_HEIGHT  && worldPos.y > gorgeLimitDown) {
-				firstParent()->translate(0.f, -SPEED, 0.f);
+				movY -= SPEED;
+				if(movY <= 1.f){
+					firstParent()->translate(0.f, -1.f, 0.f);
+					movY = 0.f;
+				}
 			}
 			if(keyboard->keyDown(left) && worldPos.x > 1 + HALF_WIDTH) {
-				firstParent()->translate(-SPEED, 0.f, 0.f);
+				movX -= SPEED;
+				if(movX <= -1.f){
+					firstParent()->translate(-1.f, 0.f, 0.f);
+					movX = 0.f;
+				}
 			}
 			if(keyboard->keyDown(right) && worldPos.x < 63 - HALF_WIDTH) {
-				firstParent()->translate(SPEED, 0.f, 0.f);
+				movX += SPEED;
+				if(movX >= 1.f){
+					firstParent()->translate(1.f, 0.f, 0.f);
+					movX = 0.f;
+				}
 			}
 			if(bullets > 0 && keyboard->keyJustDown(shootC)) {
 				shoot();

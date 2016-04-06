@@ -8,7 +8,7 @@
 class RenderSurface;
 class StandardFrameBuffer;
 
-class MY_Scene_ScreenShaders : public MY_Scene_Base{
+class MY_Scene_Main : public MY_Scene_Base{
 public:
 
 	MeshEntity * drawText;
@@ -44,6 +44,6 @@ public:
 	virtual void emitBullet(Transform * _from, int _yDir);
 	virtual void updateBulletDisplay();
 
-	MY_Scene_ScreenShaders(Game * _game, bool _showMenu);
-	~MY_Scene_ScreenShaders();
+	MY_Scene_Main(Game * _game, bool _showMenu);
+	~MY_Scene_Main();
 };
